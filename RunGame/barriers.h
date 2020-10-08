@@ -3,6 +3,7 @@
 
 //#include <QWidget>
 #include<QPixmap>
+#include<QTimer>
 
 ///////障碍物基类///////
 class Barriers
@@ -20,6 +21,7 @@ public:
     void setY(int y);
     int getWidth();
     int getHeight();
+
 
 signals:
 
@@ -39,6 +41,38 @@ public:
     void move();  //障碍移动
     bool done();  //障碍是否已过去
 };
+
+///////金币///////
+class Coin:public Barriers
+{
+private:
+    QPixmap img[4];
+public:
+    QTimer coinappear ;
+    int speed;
+    Coin(int x,int y,int width,int height);
+    QPixmap getImg();
+    bool isCollision(int lx,int ly,int wid,int hei);  //判断是否发生碰撞
+    void move();  //障碍移动
+    bool done();  //障碍是否已过去
+    int cointime;
+
+};
+
+///////箭///////
+class Arrow:public Barriers
+{
+private:
+    QPixmap img;
+public:
+    int speed;
+    Arrow(int x,int y,int width,int height);
+    QPixmap getImg();
+    bool isCollision(int lx,int ly,int wid,int hei);  //判断是否发生碰撞
+    void move();  //障碍移动
+    bool done();  //障碍是否已过去
+};
+
 
 
 #endif // BARRIERS_H

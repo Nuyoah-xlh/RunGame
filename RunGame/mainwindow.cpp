@@ -42,6 +42,12 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete start ;
+    delete gamebutton ;
+    delete game_widget ;
 }
+
+
+
 
 

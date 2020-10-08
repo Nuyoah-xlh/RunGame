@@ -17,10 +17,10 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    GameButton *gamebutton;
-    gamewidget *game_widget;
+    GameButton *gamebutton= NULL;
+    gamewidget *game_widget=NULL;
  //   void paintEvent(QPaintEvent *event);
-    QPropertyAnimation *start;
+    QPropertyAnimation *start=NULL;
 
 private:
     Ui::MainWindow *ui;

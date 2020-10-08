@@ -23,11 +23,19 @@ private:
     int x;
     int y;
 
+    //设置血量
+    int hp ;
+    int hpmax ;
+
+    int curRunImg=0;
+    int score = 0 ;
+
 public:
    // explicit role(QWidget *parent = nullptr);
     role(gamewidget *game);
     QTimer run_Timer;  //定时器
     QTimer jump_Timer;
+    QTimer hp_Timer ;
     bool jump_once;  //已经跳了一次
     bool jump_twice;  //已经跳了两次
     bool in_fall;  //正在下落
@@ -42,6 +50,20 @@ public:
     int getHei();
     void move(bool up,bool down,bool right,bool esc);  //人物坐标移动
     QPixmap getImg();
+    void pauserole();
+    void continuerole();
+
+    //HP相关
+    void reduceHp();
+    void increaseHp(int d);
+    int getCurHp();
+    int getCurHpPercent();
+    //
+    void dashmove_() ;
+
+    void addScore(int s);
+    int getScore();
+
 
 signals:
 

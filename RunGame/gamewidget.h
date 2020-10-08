@@ -19,8 +19,11 @@ private:
     QPixmap ground;       //地面
     role *r=NULL;
 public:
+    ~gamewidget();
     explicit gamewidget(QWidget *parent = nullptr,int wid=1280,int heig=720);
     std::vector<Wall *> barrier;  //放障碍物的容器
+    std::vector<Coin *> barrier2;  //放障碍物的容器
+    std::vector<Arrow *> barrier3;  //放障碍物的容器
     double backImgX[3]={0,200,0}; //图片水平移动参数
     double imgSpeed[3]={0.15,1,0.5};  //移动速度参数
     double ground_X;  //X点
@@ -38,6 +41,10 @@ public:
     void keyPressEvent(QKeyEvent *event);  //键盘按下事件
     void keyReleaseEvent(QKeyEvent *event);  //键盘释放事件
     void addBarriers();   //增加障碍物
+    void gamepause();
+    void gamecontinue();
+    void dashmove();
+    int Coinnum ;
 
 
 

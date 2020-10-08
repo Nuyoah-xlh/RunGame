@@ -1,8 +1,15 @@
 #include "barriers.h"
-#include<QTime>
+
+#include<QTimer>
 
 #define wall_1 ":/new/prefix1/image/wall1.png"
 #define wall_2 ":/new/prefix1/image/wall2.png"
+#define coin_1 ":/new/prefix1/image/coin_001.png"
+#define coin_2 ":/new/prefix1/image/coin_002.png"
+#define coin_3 ":/new/prefix1/image/coin_003.png"
+#define coin_4 ":/new/prefix1/image/coin_004.png"
+#define arrow_1 ":/new/prefix1/image/arrow.png"
+
 
 /////基类////
 Barriers::Barriers(int x,int y,int width,int height)
@@ -66,6 +73,88 @@ void Wall::move()
 bool Wall::done()
 {
     if(this->getX()<=(-this->getWidth()))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/////金币////
+Coin::Coin(int x, int y, int width, int height)
+    :Barriers(x,y,width,height)
+{
+
+    this->img[0].load(QString(":/new/prefix1/image/coin_001.png"));
+    this->img[1].load(QString(":/new/prefix1/image/coin_002.png"));
+    this->img[2].load(QString(":/new/prefix1/image/coin_003.png"));
+    this->img[3].load(QString(":/new/prefix1/image/coin_004.png"));
+    cointime=0;
+    coinappear.setInterval(100);
+    QObject::connect(&coinappear,&QTimer::timeout,
+            [=]()
+            {
+                cointime=(cointime+1)%3;
+            }
+      );
+
+    coinappear.start();
+
+}
+
+QPixmap Coin::getImg()
+{
+    return this->img[cointime];
+}
+bool Coin::isCollision(int lx, int ly, int lwid, int lhei)
+{
+    QRect rect_1(this->getX(),this->getY(),this->getWidth()+20,this->getHeight()+20);
+    QRect rect_2(lx,ly,lwid,lhei);
+    return rect_1.intersects(rect_2);    //返回两个矩形是否发生碰撞的结果
+}
+void Coin::move()
+{
+    this->setX(this->getX()-5);
+
+}
+bool Coin::done()
+{
+    if(this->getX()<-10)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/////箭////
+Arrow::Arrow(int x, int y, int width, int height)
+    :Barriers(x,y,width,height)
+{
+    this->img.load(QString(":/new/prefix1/image/arrow.png"));
+}
+QPixmap Arrow::getImg()
+{
+    return this->img;
+}
+bool Arrow::isCollision(int lx, int ly, int lwid, int lhei)
+{
+    QRect rect_1(this->getX(),this->getY(),this->getWidth(),this->getHeight());
+    QRect rect_2(lx,ly,lwid,lhei);
+    return rect_1.intersects(rect_2);    //返回两个矩形是否发生碰撞的结果
+}
+void Arrow::move()
+{
+    this->setX(this->getX()+5);
+
+}
+bool Arrow::done()
+{
+    if(this->getX()>1200)
     {
         return true;
     }

@@ -38,6 +38,7 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
     isPause=false;
     ground_speed=1;
     ground_X=0;
+    Coinnum = 0 ;
     //setAttribute(Qt::WA_OpaquePaintEvent);
     remove.setInterval(17);
     this->grabKeyboard(); //激活键盘事件捕获
@@ -55,9 +56,57 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     {
                         if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
                         {
+                            r->reduceHp();
                             barrier.clear();
+                            break ;
                         }
-                        (*i)->move();
+                        if(!barrier.empty())
+                        {
+                            (*i)->move();
+                        }
+
+                     }
+                  }
+                for(auto i=barrier2.begin();i!=barrier2.end();i++)
+                {
+                    if((*i)->done())
+                    {
+                        i=barrier2.erase(i);
+                    }
+                    else
+                    {
+                        if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
+                        {
+                            //r->reduceHp();
+                             barrier2.erase(i);
+                             Coinnum++ ;
+                            break ;
+                        }
+                        if(!barrier2.empty())
+                        {
+                            (*i)->move();
+                        }
+                    }
+
+                }
+                for(auto i=barrier3.begin();i!=barrier3.end();i++)
+                {
+                    if((*i)->done())
+                    {
+                        i=barrier3.erase(i);
+                    }
+                    else
+                    {
+                        if((*i)->isCollision(r->getX(),r->getY(),r->getWid(),r->getWid()))
+                        {
+                            r->reduceHp();
+                            i=barrier3.erase(i);
+
+                        }
+                        if(!barrier3.empty())
+                        {
+                            (*i)->move();
+                        }
                     }
 
                 }
@@ -65,10 +114,14 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                 {
                     addBarriers();  //增加障碍物函数
                 }
-                update();
+               // update();
             }
       );
 
+}
+gamewidget::~gamewidget()
+{
+    delete r;
 }
 void gamewidget::paintEvent(QPaintEvent *event)
 {
@@ -81,6 +134,7 @@ void gamewidget::paintEvent(QPaintEvent *event)
     }
     else
     {
+        //qDebug()<<r->getX()<<r->getY();
        // painter.drawPixmap(QRect(0,0,this->width(),this->height())
                  //    ,background_up
           //           ,QRect(backImgX[0],0,this->width(),this->height()));
@@ -131,8 +185,32 @@ void gamewidget::paintEvent(QPaintEvent *event)
         }
         //绘制人物
        painter.drawPixmap(QRect(r->getX(),r->getY(),r->getWid(),r->getHei()),r->getImg());
+
+
+       //血量绘制
+       painter.drawRect(QRect(1000,50,150,10));
+       painter.fillRect(QRect(1000,50,r->getCurHpPercent()*150/100,10),Qt::red);
+       painter.drawLine(1050,50,1050,60);
+       painter.drawLine(1100,50,1100,60);
+       QPen pen1(Qt::black);
+       painter.setFont(QFont("黑体",20));
+       pen1.setColor(Qt::black);
+       painter.setPen(pen1);
+       painter.drawText(1000,100,QString("HP:%1%").arg(r->getCurHpPercent()));
+       //绘制金币数量
+       painter.drawText(100,100,QString("Coinnum:%1").arg(Coinnum)) ;
+       //分数绘制
+        painter.drawText(500,100,QString("Score:%1").arg(r->getScore()));
        //绘制障碍物
        for(auto i=barrier.begin();i!=barrier.end();i++)
+       {
+           painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+       }
+       for(auto i=barrier2.begin();i!=barrier2.end();i++)
+       {
+           painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+       }
+       for(auto i=barrier3.begin();i!=barrier3.end();i++)
        {
            painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
        }
@@ -149,17 +227,47 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
 
         int x=this->width()+10;
 
-        int y=(rand()%(int)(ground_Y*0.4))+this->ground_Y*0.6;
+        int y=this->ground_Y*0.7-(rand()%(int)(ground_Y*0.3));
         barrier.push_back(new Wall(x,y,70,ground_Y-y));
         LastWall_time=0;
     }
     LastWall_time++;
+
+    static int LastCoin_time;
+   // srand(time(NULL));
+    if(LastCoin_time>=20)
+    {
+
+        int x= this->width()+5 ;
+        int y = ground_Y-rand()%400;
+        barrier2.push_back(new Coin(x,y,15,16));
+        LastCoin_time=0;
+        //qDebug()<<12333;
+    }
+    LastCoin_time++;
+
+    static int LastArrow_time;
+    //srand(time(NULL));
+    if(LastArrow_time>=100)
+    {
+
+        int x=-800;
+        int y =ground_Y-rand()%400;
+        barrier3.push_back(new Arrow(x,y,400,100));
+        LastArrow_time=0;
+
+    }
+    LastArrow_time++;
+
+
+
 }
 void gamewidget::start_game()
 {
     r=new role(this);
     r->run_Timer.start();
     remove.start();
+    r->hp_Timer.start();
     update();
 
 }
@@ -180,12 +288,36 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key()==Qt::Key_Escape)
     {
-        esc=true;
+        if(isPause==false)
+        {
+            gamepause();
+        }
+        else
+        {
+            gamecontinue()  ;
+        }
     }
+    else if(event->key()==Qt::Key_Q)
+    {
+         r->dashmove_() ;
+    }
+
     else
     {
         return QWidget::keyPressEvent(event);
     }
+}
+void gamewidget::gamepause()
+{
+    isPause = true;
+    remove.stop() ;
+    r->pauserole();
+}
+void gamewidget::gamecontinue()
+{
+    isPause = false;
+    remove.start() ;
+    r->continuerole();
 }
 void gamewidget::keyReleaseEvent(QKeyEvent *event){
     if(event->key()==Qt::Key_W)

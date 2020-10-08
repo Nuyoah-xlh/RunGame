@@ -16,11 +16,13 @@
 
 role::role(gamewidget *game)
 {
+    this->hp=3600;
+    this->hpmax=3600; //血量
     game=game;
     this->wid=30;
     this->hei=40;
     this->x=100;
-    this->y=610;
+    this->y=150;
     jump_once=false;
     jump_twice=false;
     twice_jumpready=false;
@@ -31,6 +33,10 @@ role::role(gamewidget *game)
     fallspeed_a=0.5;
     jump_Timer.setInterval(400);
     jump_Timer.setSingleShot(true);
+
+   /* //run时每帧时长
+
+    */
     //加载图片
     for(int i=0;i<=4;i++)
     {
@@ -47,6 +53,22 @@ role::role(gamewidget *game)
 
             }
       );
+
+    hp_Timer.setInterval(10);  //设定每帧时长
+    connect(&hp_Timer,&QTimer::timeout,
+            [=]()
+            {
+                    if(hp<hpmax)
+                    {
+                        hp+=1 ;
+                    }
+
+            }
+      );
+
+
+
+
 
 }
 void role::move(bool up,bool down,bool right,bool esc)
@@ -133,6 +155,9 @@ void role::move(bool up,bool down,bool right,bool esc)
          this->x-=1;  //停止加速后，缓慢归位
     }
     //qDebug()<<y;
+    //时间加分
+    this->score++;
+
 }
 int role::getX()
 {
@@ -167,5 +192,41 @@ QPixmap role::getImg()
     }
 
     return img;
+}
+void role::pauserole()
+{
+    run_Timer.stop();
+}
+void role::continuerole()
+{
+    run_Timer.start();
+}
+
+// 血量操作
+void role::reduceHp(){
+    this->hp-=1200;
+    if(this->hp<=0) this->hp=0;
+}
+int role::getCurHp(){
+    return this->hp;
+}
+int role::getCurHpPercent(){
+    return this->hp*100/this->hpmax;
+}
+void role::increaseHp(int d){
+    this->hp+=d;
+    if(this->hp>this->hpmax) this->hp=this->hpmax;
+}
+
+//dash
+void role::dashmove_(){
+    x+=400 ;
+}
+
+void role::addScore(int s){
+    this->score+=s;
+}
+int role::getScore(){
+    return this->score;
 }
 
