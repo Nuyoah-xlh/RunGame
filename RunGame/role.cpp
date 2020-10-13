@@ -54,7 +54,7 @@ role::role(gamewidget *game)
             }
       );
 
-    hp_Timer.setInterval(10);  //设定每帧时长
+    hp_Timer.setInterval(20);  //设定每帧时长
     connect(&hp_Timer,&QTimer::timeout,
             [=]()
             {
@@ -71,7 +71,7 @@ role::role(gamewidget *game)
 
 
 }
-void role::move(bool up,bool down,bool right,bool esc)
+void role::move(bool up,bool down,bool right,bool left)
 {
     if(this->y==610)
     {
@@ -154,6 +154,15 @@ void role::move(bool up,bool down,bool right,bool esc)
     {
          this->x-=1;  //停止加速后，缓慢归位
     }
+    //向左加速
+    if(left)
+    {
+        this->x-=10;
+    }
+    else
+    {
+         this->x-=1;  //停止加速后，缓慢归位
+    }
     //qDebug()<<y;
     //时间加分
     this->score++;
@@ -174,6 +183,14 @@ int role::getWid()
 int role::getHei()
 {
     return this->hei;
+}
+void role::setScore(int n)
+{
+    this->score+=n;
+}
+int role::getScore()
+{
+    return this->score;
 }
 QPixmap role::getImg()
 {
@@ -204,7 +221,7 @@ void role::continuerole()
 
 // 血量操作
 void role::reduceHp(){
-    this->hp-=1200;
+    this->hp-=700;
     if(this->hp<=0) this->hp=0;
 }
 int role::getCurHp(){
@@ -226,7 +243,7 @@ void role::dashmove_(){
 void role::addScore(int s){
     this->score+=s;
 }
-int role::getScore(){
+/**int role::getScore(){
     return this->score;
-}
+}**/
 

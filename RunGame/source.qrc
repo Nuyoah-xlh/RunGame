@@ -15,10 +15,13 @@
         <file>image/jump.png</file>
         <file>image/wall1.png</file>
         <file>image/wall2.png</file>
-        <file>image/arrow.png</file>
         <file>image/coin_001.png</file>
         <file>image/coin_002.png</file>
         <file>image/coin_003.png</file>
         <file>image/coin_004.png</file>
+        <file>image/hurt.png</file>
+        <file>image/arrow.png</file>
+        <file>image/pause.jpg</file>
+        <file>image/gameover.jpg</file>
     </qresource>
 </RCC>

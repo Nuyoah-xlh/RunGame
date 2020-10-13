@@ -9,6 +9,7 @@
 #include<time.h>
 #include<QTime>
 #include<ctime>
+#include<QMessageBox>
 
 //class role;
 
@@ -17,6 +18,10 @@
 #define back_down ":/new/prefix1/image/foggy.png"
 #define before ":/new/prefix1/image/background.png"
 #define ground_img ":/new/prefix1/image/ground.png"
+#define hurtimg ":/new/prefix1/image/hurt.png"
+#define gameover ":/new/prefix1/image/gameover.jpg"
+#define pause ":/new/prefix1/image/pause.jpg"
+
 
 gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
 {
@@ -29,23 +34,41 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
     background[2].load(back_down);
     before_start.load(before);
     ground.load(ground_img);
+    hurtImg.load(hurtimg);
+    pauseImg.load(pause);
+    gameOverImg.load(gameover);
     //按键初始化
     up=false;
     down=false;
+    left=false;
+    difficult=0;
     right=false;
-    esc=false;
+    //esc=false;
     isRuning=false;
     isPause=false;
     ground_speed=1;
     ground_X=0;
+    Score=0;
+    beforegame=true;
     Coinnum = 0 ;
+   // difficult=0;
     //setAttribute(Qt::WA_OpaquePaintEvent);
     remove.setInterval(17);
     this->grabKeyboard(); //激活键盘事件捕获
+   // static n;
     connect(&remove,&QTimer::timeout,
             [=]()
             {
-                r->move(up,down,right,esc);
+                r->move(up,down,right,left);
+                if(difficult<=80)   //随时间提高难度
+                {
+                    difficult+=0.0015;
+
+               }
+                else
+                {
+                    difficult=80;
+                }
                 for(auto i=barrier.begin();i!=barrier.end();i++)
                 {
                     if((*i)->done())
@@ -57,6 +80,15 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                         if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
                         {
                             r->reduceHp();
+                            if(r->getScore()>=100)  //撞击到障碍物扣分
+                            {
+                                r->setScore(-100);
+                            }
+                            else
+                            {
+                                r->setScore(0);
+                            }
+                            hurtImgAlpha=255;
                             barrier.clear();
                             break ;
                         }
@@ -78,6 +110,7 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                         if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
                         {
                             //r->reduceHp();
+                             r->setScore(30); //吃到金币加分
                              barrier2.erase(i);
                              Coinnum++ ;
                             break ;
@@ -99,8 +132,18 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     {
                         if((*i)->isCollision(r->getX(),r->getY(),r->getWid(),r->getWid()))
                         {
+                            if(r->getScore()>=100)  //撞击到障碍物扣分
+                            {
+                                r->setScore(-100);
+                            }
+                            else
+                            {
+                                r->setScore(0);
+                            }
                             r->reduceHp();
-                            i=barrier3.erase(i);
+                            hurtImgAlpha=255;
+                            barrier3.clear();
+                            break;
 
                         }
                         if(!barrier3.empty())
@@ -112,6 +155,10 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                 }
                 if(isRuning)
                 {
+                    if(r->getCurHp()<=0)
+                    {
+                        gameIsOver();   //血量为0则游戏结束
+                    }
                     addBarriers();  //增加障碍物函数
                 }
                // update();
@@ -127,12 +174,23 @@ void gamewidget::paintEvent(QPaintEvent *event)
 {
 
     QPainter painter(this);
-    if(isRuning==false)
+    if(isRuning==false&&beforegame==true)   //游戏首页
     {
         painter.drawPixmap(0,0,this->width(),this->height(),QPixmap(before_start));
+
        // qDebug()<<"2222";
     }
-    else
+    else if(GameOver==true)  //结束游戏
+    {
+        //GameIsOver绘制
+
+
+        if(GameOver)
+        {
+            painter.drawPixmap(QRect(240,60,800,600),gameOverImg);
+        }
+    }
+    else  //游戏中绘制
     {
         //qDebug()<<r->getX()<<r->getY();
        // painter.drawPixmap(QRect(0,0,this->width(),this->height())
@@ -187,6 +245,21 @@ void gamewidget::paintEvent(QPaintEvent *event)
        painter.drawPixmap(QRect(r->getX(),r->getY(),r->getWid(),r->getHei()),r->getImg());
 
 
+
+       //受伤绘制
+       if(hurtImgAlpha!=0) {
+           QPixmap temp(hurtImg.size());
+
+           temp.fill(Qt::transparent);
+           QPainter p2(&temp);
+           p2.setCompositionMode(QPainter::CompositionMode_Source);
+           p2.drawPixmap(0,0,hurtImg);
+           p2.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+           p2.fillRect(temp.rect(),QColor(0,0,0,hurtImgAlpha));
+           painter.drawPixmap(QRect(0,0,this->width(),this->height()),temp);
+           hurtImgAlpha-=3;
+       }
+
        //血量绘制
        painter.drawRect(QRect(1000,50,150,10));
        painter.fillRect(QRect(1000,50,r->getCurHpPercent()*150/100,10),Qt::red);
@@ -201,6 +274,7 @@ void gamewidget::paintEvent(QPaintEvent *event)
        painter.drawText(100,100,QString("Coinnum:%1").arg(Coinnum)) ;
        //分数绘制
         painter.drawText(500,100,QString("Score:%1").arg(r->getScore()));
+
        //绘制障碍物
        for(auto i=barrier.begin();i!=barrier.end();i++)
        {
@@ -214,6 +288,11 @@ void gamewidget::paintEvent(QPaintEvent *event)
        {
            painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
        }
+       //暂停绘制
+       if(isPause)
+       {
+           painter.drawPixmap((this->width()-pauseImg.width())/2,(this->height()-pauseImg.height())/2,pauseImg);
+       }
        update();
     }
 
@@ -222,12 +301,12 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
 {
     static int LastWall_time;
     srand(time(NULL));
-    if(LastWall_time>=200)
+    if(LastWall_time>=200-difficult)
     {
 
         int x=this->width()+10;
 
-        int y=this->ground_Y*0.7-(rand()%(int)(ground_Y*0.3));
+        int y=this->ground_Y-200-(rand()%(int)(ground_Y*0.3));
         barrier.push_back(new Wall(x,y,70,ground_Y-y));
         LastWall_time=0;
     }
@@ -235,11 +314,11 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
 
     static int LastCoin_time;
    // srand(time(NULL));
-    if(LastCoin_time>=20)
+    if(LastCoin_time>=30-difficult)
     {
 
         int x= this->width()+5 ;
-        int y = ground_Y-rand()%400;
+        int y = ground_Y-100-rand()%400;
         barrier2.push_back(new Coin(x,y,15,16));
         LastCoin_time=0;
         //qDebug()<<12333;
@@ -248,11 +327,11 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
 
     static int LastArrow_time;
     //srand(time(NULL));
-    if(LastArrow_time>=100)
+    if(LastArrow_time>=100-difficult)
     {
 
-        int x=-800;
-        int y =ground_Y-rand()%400;
+        int x=this->width()+100;
+        int y =ground_Y-100-rand()%400;
         barrier3.push_back(new Arrow(x,y,400,100));
         LastArrow_time=0;
 
@@ -268,6 +347,11 @@ void gamewidget::start_game()
     r->run_Timer.start();
     remove.start();
     r->hp_Timer.start();
+    GameOver=false;
+    beforegame=false;
+    isRuning=true;
+    Coinnum=0;
+    isPause=false;
     update();
 
 }
@@ -286,14 +370,22 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
     {
         right=true;
     }
+    else if(event->key()==Qt::Key_A)
+    {
+        left=true;
+    }
+
     else if(event->key()==Qt::Key_Escape)
     {
         if(isPause==false)
         {
+            r->hp_Timer.stop();
             gamepause();
+
         }
         else
         {
+            r->hp_Timer.start();
             gamecontinue()  ;
         }
     }
@@ -301,12 +393,34 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
     {
          r->dashmove_() ;
     }
-
+    else if(GameOver && event->key()==Qt::Key_R)
+    {
+        start_game();
+    }
+    else if(GameOver&&event->key()==Qt::Key_B)
+    {
+        back();
+    }
     else
     {
         return QWidget::keyPressEvent(event);
     }
 }
+void gamewidget::back()
+{
+    beforegame=true;
+    button->init();  //按钮重新回归原位
+    update();
+
+}
+/**void gamewidget::restart()
+{
+    GameOver=true;
+    isRuning=false;
+    delete r;
+
+}
+**/
 void gamewidget::gamepause()
 {
     isPause = true;
@@ -332,9 +446,33 @@ void gamewidget::keyReleaseEvent(QKeyEvent *event){
     else if(event->key()==Qt::Key_D)
     {
         right=false;
+    }   
+    else if(event->key()==Qt::Key_A)
+    {
+        left=false;
     }
     else
     {
         return QWidget::keyPressEvent(event);
     }
+}
+
+void gamewidget::gameIsOver()
+{
+    //弹出游戏结算框
+    r->hp_Timer.stop();
+    QString str="你的分数："+QString("%1").arg(r->getScore())+'\n'+"你的金币："+QString("%1").arg(Coinnum);
+
+    QMessageBox::about(this,"游戏结束",str);
+    isRuning=false;
+    GameOver=true;
+    Score=r->getScore();
+    remove.stop();
+    barrier.clear();
+    barrier2.clear();
+    barrier3.clear();
+    r->run_Timer.stop();
+    //r->hp_Timer.stop();
+    delete r;
+    update();
 }

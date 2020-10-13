@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
                 start->setEndValue(QRect(gamebutton->x(),750,gamebutton->width(),gamebutton->height()));
                 start->start();
                 game_widget->isRuning=true;
+                game_widget->button=gamebutton;
                 game_widget->start_game();
             }
                );

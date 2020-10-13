@@ -1,6 +1,7 @@
 #include "barriers.h"
 
 #include<QTimer>
+#include<QDebug>
 
 #define wall_1 ":/new/prefix1/image/wall1.png"
 #define wall_2 ":/new/prefix1/image/wall2.png"
@@ -110,7 +111,7 @@ QPixmap Coin::getImg()
 }
 bool Coin::isCollision(int lx, int ly, int lwid, int lhei)
 {
-    QRect rect_1(this->getX(),this->getY(),this->getWidth()+20,this->getHeight()+20);
+    QRect rect_1(this->getX(),this->getY(),this->getWidth()-30,this->getHeight()+20);
     QRect rect_2(lx,ly,lwid,lhei);
     return rect_1.intersects(rect_2);    //返回两个矩形是否发生碰撞的结果
 }
@@ -135,7 +136,7 @@ bool Coin::done()
 Arrow::Arrow(int x, int y, int width, int height)
     :Barriers(x,y,width,height)
 {
-    this->img.load(QString(":/new/prefix1/image/arrow.png"));
+    this->img.load(arrow_1);
 }
 QPixmap Arrow::getImg()
 {
@@ -143,18 +144,19 @@ QPixmap Arrow::getImg()
 }
 bool Arrow::isCollision(int lx, int ly, int lwid, int lhei)
 {
-    QRect rect_1(this->getX(),this->getY(),this->getWidth(),this->getHeight());
+    QRect rect_1(this->getX(),this->getY(),this->getWidth()-300,this->getHeight()-20);
+    //qDebug()<<this->getX()<<this->getY()<<this->getWidth()<<this->getHeight();
     QRect rect_2(lx,ly,lwid,lhei);
     return rect_1.intersects(rect_2);    //返回两个矩形是否发生碰撞的结果
 }
 void Arrow::move()
 {
-    this->setX(this->getX()+5);
+    this->setX(this->getX()-10);
 
 }
 bool Arrow::done()
 {
-    if(this->getX()>1200)
+    if(this->getX()<=(-this->getWidth()))
     {
         return true;
     }

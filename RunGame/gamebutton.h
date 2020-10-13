@@ -19,6 +19,7 @@ public:
     void enterEvent(QEvent *event); //鼠标移入函数
     void leaveEvent(QEvent *event);  //鼠标移出函数
     void mouseReleaseEvent(QMouseEvent *e);  //鼠标点击
+    void init();
 
 
 signals:

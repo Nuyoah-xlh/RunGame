@@ -36,6 +36,7 @@ public:
     QTimer run_Timer;  //定时器
     QTimer jump_Timer;
     QTimer hp_Timer ;
+
     bool jump_once;  //已经跳了一次
     bool jump_twice;  //已经跳了两次
     bool in_fall;  //正在下落
@@ -48,7 +49,9 @@ public:
     int getY();
     int getWid();
     int getHei();
-    void move(bool up,bool down,bool right,bool esc);  //人物坐标移动
+    void setScore(int n);
+    int getScore();
+    void move(bool up,bool down,bool right,bool left);  //人物坐标移动
     QPixmap getImg();
     void pauserole();
     void continuerole();
@@ -58,11 +61,11 @@ public:
     void increaseHp(int d);
     int getCurHp();
     int getCurHpPercent();
-    //
+
     void dashmove_() ;
 
     void addScore(int s);
-    int getScore();
+    //int getScore();
 
 
 signals:
