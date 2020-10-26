@@ -18,9 +18,15 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     GameButton *gamebutton= NULL;
+    GameButton *gamebutton2= NULL;
+    GameButton *gamebutton3= NULL;
+    GameButton *gamebutton4= NULL;
     gamewidget *game_widget=NULL;
  //   void paintEvent(QPaintEvent *event);
     QPropertyAnimation *start=NULL;
+
+private slots:
+
 
 private:
     Ui::MainWindow *ui;

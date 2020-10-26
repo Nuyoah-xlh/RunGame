@@ -31,7 +31,13 @@ public:
     std::vector<Wall *> barrier;  //放障碍物的容器
     std::vector<Coin *> barrier2;  //放障碍物的容器
     std::vector<Arrow *> barrier3;  //放障碍物的容器
+    std::vector<Bottle *> barrier4;  //放障碍物的容器
+    std::vector<Magic *> barrier5;  //放障碍物的容器
     GameButton *button=NULL;
+    GameButton *button_2=NULL;
+    GameButton *button_3=NULL;
+    GameButton *button_4=NULL;
+
     double backImgX[3]={0,200,0}; //图片水平移动参数
     double imgSpeed[3]={0.15,1,0.5};  //移动速度参数
     double ground_X;  //X点

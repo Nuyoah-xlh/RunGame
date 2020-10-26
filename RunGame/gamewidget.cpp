@@ -10,6 +10,7 @@
 #include<QTime>
 #include<ctime>
 #include<QMessageBox>
+#include<QFile>
 
 //class role;
 
@@ -25,6 +26,14 @@
 
 gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
 {
+        QFile file("save.txt");
+        if ( file.exists())
+        {
+            file.remove();
+        }
+        file.open( QIODevice::WriteOnly );
+        file.close();
+
     this->resize(wid,heig);  //固定尺寸
     ground_Y=heig-70;
     //R=nullptr;
@@ -153,6 +162,54 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     }
 
                 }
+                for(auto i=barrier4.begin();i!=barrier4.end();i++)
+                {
+                    if((*i)->done())
+                    {
+                        i=barrier4.erase(i);
+                    }
+                    else
+                    {
+                        if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
+                        {
+
+                            r->increaseHp(700);
+                             i=barrier4.erase(i);
+                             //Coinnum++ ;
+                            break ;
+                        }
+                        if(!barrier4.empty())
+                        {
+                            (*i)->move();
+                        }
+                    }
+
+                }
+                for(auto i=barrier5.begin();i!=barrier5.end();i++)
+                {
+                    if((*i)->done())
+                    {
+                        i=barrier5.erase(i);
+                    }
+                    else
+                    {
+                        if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
+                        {
+
+
+                             barrier5.clear();
+                             barrier.clear();
+                             barrier3.clear();
+                             //Coinnum++ ;
+                            break ;
+                        }
+                        if(!barrier5.empty())
+                        {
+                            (*i)->move();
+                        }
+                    }
+
+                }
                 if(isRuning)
                 {
                     if(r->getCurHp()<=0)
@@ -177,6 +234,7 @@ void gamewidget::paintEvent(QPaintEvent *event)
     if(isRuning==false&&beforegame==true)   //游戏首页
     {
         painter.drawPixmap(0,0,this->width(),this->height(),QPixmap(before_start));
+
 
        // qDebug()<<"2222";
     }
@@ -288,8 +346,16 @@ void gamewidget::paintEvent(QPaintEvent *event)
        {
            painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
        }
+       for(auto i=barrier4.begin();i!=barrier4.end();i++)
+       {
+           painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+       }
+       for(auto i=barrier5.begin();i!=barrier5.end();i++)
+       {
+           painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+       }
        //暂停绘制
-       if(isPause)
+       if(isPause&&!GameOver)
        {
            painter.drawPixmap((this->width()-pauseImg.width())/2,(this->height()-pauseImg.height())/2,pauseImg);
        }
@@ -306,7 +372,7 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
 
         int x=this->width()+10;
 
-        int y=this->ground_Y-200-(rand()%(int)(ground_Y*0.3));
+        int y=this->ground_Y-100-(rand()%(int)(ground_Y*0.3));
         barrier.push_back(new Wall(x,y,70,ground_Y-y));
         LastWall_time=0;
     }
@@ -318,7 +384,7 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
     {
 
         int x= this->width()+5 ;
-        int y = ground_Y-100-rand()%400;
+        int y = ground_Y-18-rand()%300;
         barrier2.push_back(new Coin(x,y,15,16));
         LastCoin_time=0;
         //qDebug()<<12333;
@@ -331,12 +397,38 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
     {
 
         int x=this->width()+100;
-        int y =ground_Y-100-rand()%400;
+        int y =ground_Y-90-rand()%400;
         barrier3.push_back(new Arrow(x,y,400,100));
         LastArrow_time=0;
 
     }
     LastArrow_time++;
+
+    static int LastBlood_time;
+    //srand(time(NULL));
+    if(LastBlood_time>=250)
+    {
+
+        int x= this->width()+10 ;
+        int y = ground_Y-45-rand()%300;
+        barrier4.push_back(new Bottle(x,y,40,40));
+        LastBlood_time=0;
+
+    }
+    LastBlood_time++;
+
+    static int LastMagic_time;
+    //srand(time(NULL));
+    if(LastMagic_time>=220)
+    {
+
+        int x= this->width()+10 ;
+        int y = ground_Y-55-rand()%300;
+        barrier5.push_back(new Magic(x,y,40,70));
+        LastMagic_time=0;
+
+    }
+    LastMagic_time++;
 
 
 
@@ -375,7 +467,7 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
         left=true;
     }
 
-    else if(event->key()==Qt::Key_Escape)
+    else if(!GameOver&&event->key()==Qt::Key_Escape)
     {
         if(isPause==false)
         {
@@ -409,7 +501,11 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
 void gamewidget::back()
 {
     beforegame=true;
-    button->init();  //按钮重新回归原位
+    //button->init();
+    button->move(900,400);//按钮重新回归原位
+    button_2->show();
+    button_3->show();
+    button_4->show();
     update();
 
 }
@@ -471,6 +567,8 @@ void gamewidget::gameIsOver()
     barrier.clear();
     barrier2.clear();
     barrier3.clear();
+    barrier4.clear();
+
     r->run_Timer.stop();
     //r->hp_Timer.stop();
     delete r;

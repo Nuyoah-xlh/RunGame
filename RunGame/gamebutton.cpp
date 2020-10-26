@@ -24,7 +24,7 @@ void GameButton::mouseReleaseEvent(QMouseEvent *e)
 {
     //qDebug()<<"鼠标点击";
     isRun = true;  //进入游戏
-    this->move(this->x(),this->y()+25);
+    //this->move(this->x(),this->y()+25);
     return QPushButton::mouseReleaseEvent(e);
 }
 

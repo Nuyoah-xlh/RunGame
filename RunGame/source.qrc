@@ -23,5 +23,13 @@
         <file>image/arrow.png</file>
         <file>image/pause.jpg</file>
         <file>image/gameover.jpg</file>
+        <file>image/blood.png</file>
+        <file>image/clear.png</file>
+        <file>image/archive1.png</file>
+        <file>image/archive2.png</file>
+        <file>image/instruction1.png</file>
+        <file>image/instruction2.png</file>
+        <file>image/keyboard1.png</file>
+        <file>image/keyboard2.png</file>
     </qresource>
 </RCC>

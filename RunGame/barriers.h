@@ -59,6 +59,40 @@ public:
 
 };
 
+///////血瓶///////
+class Bottle:public Barriers
+{
+private:
+    QPixmap img;
+public:
+
+    int speed;
+    Bottle(int x,int y,int width,int height);
+    QPixmap getImg();
+    bool isCollision(int lx,int ly,int wid,int hei);  //判断是否发生碰撞
+    void move();  //障碍移动
+    bool done();  //障碍是否已过去
+
+
+};
+
+///////法杖///////
+class Magic:public Barriers
+{
+private:
+    QPixmap img;
+public:
+
+
+    Magic(int x,int y,int width,int height);
+    QPixmap getImg();
+    bool isCollision(int lx,int ly,int wid,int hei);  //判断是否发生碰撞
+    void move();  //障碍移动
+    bool done();  //障碍是否已过去
+
+
+};
+
 ///////箭///////
 class Arrow:public Barriers
 {

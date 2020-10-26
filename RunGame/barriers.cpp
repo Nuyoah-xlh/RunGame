@@ -10,6 +10,8 @@
 #define coin_3 ":/new/prefix1/image/coin_003.png"
 #define coin_4 ":/new/prefix1/image/coin_004.png"
 #define arrow_1 ":/new/prefix1/image/arrow.png"
+#define blood ":/new/prefix1/image/blood.png"
+#define magic ":/new/prefix1/image/clear.png"
 
 
 /////基类////
@@ -105,6 +107,7 @@ Coin::Coin(int x, int y, int width, int height)
 
 }
 
+
 QPixmap Coin::getImg()
 {
     return this->img[cointime];
@@ -121,6 +124,76 @@ void Coin::move()
 
 }
 bool Coin::done()
+{
+    if(this->getX()<-10)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/////血瓶////
+Bottle::Bottle(int x, int y, int width, int height)
+    :Barriers(x,y,width,height)
+{
+
+    img.load(blood);
+
+}
+QPixmap Bottle::getImg()
+{
+    return this->img;
+}
+bool Bottle::isCollision(int lx, int ly, int lwid, int lhei)
+{
+    QRect rect_1(this->getX(),this->getY(),this->getWidth()-30,this->getHeight()+20);
+    QRect rect_2(lx,ly,lwid,lhei);
+    return rect_1.intersects(rect_2);    //返回两个矩形是否发生碰撞的结果
+}
+void Bottle::move()
+{
+    this->setX(this->getX()-5);
+
+}
+bool Bottle::done()
+{
+    if(this->getX()<-10)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/////法杖////
+Magic::Magic(int x, int y, int width, int height)
+    :Barriers(x,y,width,height)
+{
+
+    img.load(magic);
+
+}
+QPixmap Magic::getImg()
+{
+    return this->img;
+}
+bool Magic::isCollision(int lx, int ly, int lwid, int lhei)
+{
+    QRect rect_1(this->getX(),this->getY(),this->getWidth()-30,this->getHeight()+20);
+    QRect rect_2(lx,ly,lwid,lhei);
+    return rect_1.intersects(rect_2);    //返回两个矩形是否发生碰撞的结果
+}
+void Magic::move()
+{
+    this->setX(this->getX()-5);
+
+}
+bool Magic::done()
 {
     if(this->getX()<-10)
     {

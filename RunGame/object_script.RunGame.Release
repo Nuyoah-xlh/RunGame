@@ -1,0 +1,13 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\gamebutton.o
+./release\gamewidget.o
+./release\role.o
+./release\barriers.o
+./release\qrc_source.o
+./release\moc_mainwindow.o
+./release\moc_gamebutton.o
+./release\moc_gamewidget.o
+./release\moc_role.o
+);
