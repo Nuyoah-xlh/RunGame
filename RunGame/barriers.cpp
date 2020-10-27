@@ -155,7 +155,7 @@ bool Bottle::isCollision(int lx, int ly, int lwid, int lhei)
 }
 void Bottle::move()
 {
-    this->setX(this->getX()-5);
+    this->setX(this->getX()-4);
 
 }
 bool Bottle::done()
