@@ -53,7 +53,7 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
 
     this->resize(wid,heig);  //固定尺寸
     ground_Y=heig-70;
-    //R=nullptr;
+
     //加载背景图
     background[0].load(back_up);
     background[1].load(back_mid);
