@@ -1,5 +1,8 @@
 #include "gamebutton.h"
 #include<QPushButton>
+#include<QSound>
+
+#define Button ":/new/prefix1/sound/button.wav"
 
 GameButton::GameButton(QString str,QString str2)
 {
@@ -23,7 +26,8 @@ void GameButton::init()
 void GameButton::mouseReleaseEvent(QMouseEvent *e)
 {
     //qDebug()<<"鼠标点击";
-    isRun = true;  //进入游戏
+    //isRun = true;  //进入游戏
+    QSound::play(Button);
     //this->move(this->x(),this->y()+25);
     return QPushButton::mouseReleaseEvent(e);
 }

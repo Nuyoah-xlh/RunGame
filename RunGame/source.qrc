@@ -31,5 +31,13 @@
         <file>image/instruction2.png</file>
         <file>image/keyboard1.png</file>
         <file>image/keyboard2.png</file>
+        <file>image/circle.png</file>
+        <file>image/title.png</file>
+        <file>sound/Theme.wav</file>
+        <file>sound/coin.wav</file>
+        <file>sound/jump.wav</file>
+        <file>sound/button.wav</file>
+        <file>sound/collision.wav</file>
+        <file>sound/over.wav</file>
     </qresource>
 </RCC>

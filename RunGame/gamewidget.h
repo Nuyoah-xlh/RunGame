@@ -33,6 +33,7 @@ public:
     std::vector<Arrow *> barrier3;  //放障碍物的容器
     std::vector<Bottle *> barrier4;  //放障碍物的容器
     std::vector<Magic *> barrier5;  //放障碍物的容器
+    std::vector<Circle *> barrier6;  //放障碍物的容器
     GameButton *button=NULL;
     GameButton *button_2=NULL;
     GameButton *button_3=NULL;
@@ -68,6 +69,7 @@ public:
     void gameIsOver();
     void restart();
     void back();  //返回首页
+    int maxscore ;
 
 
 

@@ -106,7 +106,22 @@ public:
     void move();  //障碍移动
     bool done();  //障碍是否已过去
 };
-
+///////yuanxinzhangaiwu///
+class Circle:public Barriers
+{
+private:
+    QPixmap img;
+    int r;
+    int CollisionDX,CollisionWidth; //碰撞检测
+    bool degreeUP=true;             //旋转角度及顺逆时针
+    int degree=0;
+public:
+    Circle(int x,int y,int width,int height);
+    bool isCollision(int px,int py,int pwidth,int pheight);
+    void move();
+    bool done();
+    QPixmap getImg();
+};
 
 
 #endif // BARRIERS_H

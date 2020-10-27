@@ -238,3 +238,35 @@ bool Arrow::done()
         return false;
     }
 }
+
+////////////////////// Circle 圆形障碍 /////////////////////
+Circle::Circle(int x,int y,int width,int height)
+    :Barriers(x,y,width,width){     //此处的xy表示左上角坐标
+    this->img.load(":/new/prefix1/image/circle.png");
+    img.scaled(width,width);
+    this->r=width/2;
+    this->CollisionWidth=width*0.7;
+    this->CollisionDX=width*0.15;
+}
+QPixmap Circle::getImg(){
+    QMatrix m;
+    degree+=1;
+    if(degree>=360) degree=0;
+    m.rotate(degree);
+    return this->img.transformed(m, Qt::FastTransformation);
+}
+bool Circle::isCollision(int px,int py,int pwidth,int pheight){
+    QRect rect1(this->getX()+CollisionDX,this->getY()+CollisionDX,CollisionWidth,CollisionWidth);
+    QRect rect2(px,py,pwidth,pheight);
+    return rect1.intersects(rect2);
+}
+void Circle::move()
+{
+    this->setX(this->getX()-7);
+
+}
+bool Circle::done(){
+    if(this->getX()<=-this->getWidth()) return true;
+    else return false;
+}
+

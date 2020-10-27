@@ -11,7 +11,8 @@
 #include<ctime>
 #include<QMessageBox>
 #include<QFile>
-
+#include<QSound>
+#include<QDesktopServices>
 //class role;
 
 #define back_up ":/new/prefix1/image/startBkg.png"
@@ -22,17 +23,33 @@
 #define hurtimg ":/new/prefix1/image/hurt.png"
 #define gameover ":/new/prefix1/image/gameover.jpg"
 #define pause ":/new/prefix1/image/pause.jpg"
+#define jump ":/new/prefix1/sound/jump.wav"
+#define coin ":/new/prefix1/sound/coin.wav"
+#define over ":/new/prefix1/sound/over.wav"
+#define collision ":/new/prefix1/sound/collision.wav"
 
 
 gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
 {
-        QFile file("save.txt");
-        if ( file.exists())
-        {
-            file.remove();
-        }
-        file.open( QIODevice::WriteOnly );
-        file.close();
+    QFile file("save.txt");
+    QTextStream txtInput(&file);
+    QString lineStr;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+       // qDebug()<<"Open failed." << endl;
+        return ;
+    }
+    while(!txtInput.atEnd())
+    {
+        lineStr = txtInput.readAll();
+        //if (count==0)
+        maxscore=lineStr.toInt();
+
+        //count ++ ;
+        //qDebug()<<"12345   " << maxscore ;
+    }
+    file.close();
+
 
     this->resize(wid,heig);  //固定尺寸
     ground_Y=heig-70;
@@ -88,6 +105,7 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     {
                         if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
                         {
+                            QSound::play(collision);
                             r->reduceHp();
                             if(r->getScore()>=100)  //撞击到障碍物扣分
                             {
@@ -118,7 +136,9 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     {
                         if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
                         {
+                           // QSound::play(collision);
                             //r->reduceHp();
+                            QSound::play(coin);
                              r->setScore(30); //吃到金币加分
                              barrier2.erase(i);
                              Coinnum++ ;
@@ -141,6 +161,7 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     {
                         if((*i)->isCollision(r->getX(),r->getY(),r->getWid(),r->getWid()))
                         {
+                            QSound::play(collision);
                             if(r->getScore()>=100)  //撞击到障碍物扣分
                             {
                                 r->setScore(-100);
@@ -196,14 +217,48 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                         if((*i)->isCollision(r->getX()-5,r->getY()-5,r->getWid()-5,r->getWid()-5))
                         {
 
-
+                            // QSound::play(fazhang);
                              barrier5.clear();
                              barrier.clear();
                              barrier3.clear();
+                             barrier6.clear();
                              //Coinnum++ ;
                             break ;
                         }
                         if(!barrier5.empty())
+                        {
+                            (*i)->move();
+                        }
+                    }
+
+
+                }
+                for(auto i=barrier6.begin();i!=barrier6.end();i++)
+                {
+                    if((*i)->done())
+                    {
+                        i=barrier6.erase(i);
+                    }
+                    else
+                    {
+                        if((*i)->isCollision(r->getX(),r->getY(),r->getWid(),r->getWid()))
+                        {
+                            QSound::play(collision);
+                            if(r->getScore()>=100)  //撞击到障碍物扣分
+                            {
+                                r->setScore(-100);
+                            }
+                            else
+                            {
+                                r->setScore(0);
+                            }
+                            r->reduceHp();
+                            hurtImgAlpha=255;
+                            barrier6.clear();
+                            break;
+
+                        }
+                        if(!barrier6.empty())
                         {
                             (*i)->move();
                         }
@@ -215,12 +270,55 @@ gamewidget::gamewidget(QWidget *parent,int wid,int heig) : QWidget(parent)
                     if(r->getCurHp()<=0)
                     {
                         gameIsOver();   //血量为0则游戏结束
-                    }
-                    addBarriers();  //增加障碍物函数
+                         //存档
+                        QFile file("save.txt");
+                                                QTextStream txtInput(&file);
+                                                QString lineStr;
+                                                if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+                                                {
+                                                    qDebug()<<"Open failed." << endl;
+                                                    return ;
+                                                }
+                                                while(!txtInput.atEnd())
+                                                {
+                                                    lineStr = txtInput.readAll();
+                                                    //if (count==0)
+                                                    maxscore=lineStr.toInt();
+
+                                                    //count ++ ;
+                                                    //qDebug()<<"12345   " << maxscore ;
+                                                }
+                                                file.close();
+
+                                                //QFile file("save.txt");
+                                                if(Score>maxscore)
+                                                {
+                                                    if ( file.exists())
+                                                    {
+                                                        file.remove();
+                                                    }
+                                                    file.open( QIODevice::WriteOnly );
+                                                    file.close();
+                                                    if (file.open(QFile::WriteOnly | QIODevice::Append|QIODevice::Text)) {
+                                                    QTextStream out(&file);
+                                                    out  << Score ;
+                                                    //qDebug()<<"2222";
+                                                    }
+                                                    file.close();
+                                                }
+
+
+
+
+
+
+
                 }
+                    addBarriers();  //增加障碍物函数
                // update();
             }
-      );
+      }
+                );
 
 }
 gamewidget::~gamewidget()
@@ -354,6 +452,11 @@ void gamewidget::paintEvent(QPaintEvent *event)
        {
            painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
        }
+       for(auto i=barrier6.begin();i!=barrier6.end();i++)
+       {
+           painter.drawPixmap(QRect((*i)->getX(),(*i)->getY(),(*i)->getWidth(),(*i)->getHeight()),(*i)->getImg());
+       }
+
        //暂停绘制
        if(isPause&&!GameOver)
        {
@@ -419,7 +522,7 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
 
     static int LastMagic_time;
     //srand(time(NULL));
-    if(LastMagic_time>=220)
+    if(LastMagic_time>=250)
     {
 
         int x= this->width()+10 ;
@@ -429,6 +532,17 @@ void gamewidget::addBarriers()   //，添加障碍物，可添加更多类型
 
     }
     LastMagic_time++;
+    static int LastCircle_time;
+    if(LastCircle_time>=190-difficult)
+    {
+
+        int x=this->width()+100;
+        int y =ground_Y-90-rand()%400;
+        barrier6.push_back(new Circle(x,y,90,100));
+        LastCircle_time=0;
+
+    }
+    LastCircle_time++;
 
 
 
@@ -452,6 +566,7 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
     if(event->key()==Qt::Key_W)
     {
         up=true;
+        QSound::play(jump);
         //qDebug()<<up;
     }
     else if(event->key()==Qt::Key_S)
@@ -481,7 +596,7 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
             gamecontinue()  ;
         }
     }
-    else if(event->key()==Qt::Key_Q)
+    else if(!GameOver && isRuning&&!isPause&&event->key()==Qt::Key_Q)
     {
          r->dashmove_() ;
     }
@@ -500,6 +615,25 @@ void gamewidget::keyPressEvent(QKeyEvent *event)
 }
 void gamewidget::back()
 {
+    QFile file("save.txt");
+                            QTextStream txtInput(&file);
+                            QString lineStr;
+                            if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+                            {
+                                qDebug()<<"Open failed." << endl;
+                                return ;
+                            }
+                            while(!txtInput.atEnd())
+                            {
+                                lineStr = txtInput.readAll();
+                                //if (count==0)
+                                maxscore=lineStr.toInt();
+
+                                //count ++ ;
+                               // qDebug()<<"12345   " << maxscore ;
+                            }
+                            file.close();
+
     beforegame=true;
     //button->init();
     button->move(900,400);//按钮重新回归原位
@@ -555,14 +689,44 @@ void gamewidget::keyReleaseEvent(QKeyEvent *event){
 
 void gamewidget::gameIsOver()
 {
+    QSound::play(over);
     //弹出游戏结算框
+    Score=r->getScore();
+    //maxscore=0;
+    if(Score>maxscore)
+    {
+        maxscore=Score;
+    }
     r->hp_Timer.stop();
     QString str="你的分数："+QString("%1").arg(r->getScore())+'\n'+"你的金币："+QString("%1").arg(Coinnum);
 
     QMessageBox::about(this,"游戏结束",str);
+    QFile file("save.txt");
+    QTextStream txtInput(&file);
+    QString lineStr;
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qDebug()<<"Open failed." << endl;
+        return ;
+    }
+    while(!txtInput.atEnd())
+    {
+        lineStr = txtInput.readAll();
+        //if (count==0)
+        maxscore=lineStr.toInt();
+
+        //count ++ ;
+      //  qDebug()<<"12345   " << maxscore ;
+    }
+    file.close();
+
+
+
+
+
     isRuning=false;
     GameOver=true;
-    Score=r->getScore();
+
     remove.stop();
     barrier.clear();
     barrier2.clear();
